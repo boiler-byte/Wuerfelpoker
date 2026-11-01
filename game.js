@@ -83,11 +83,12 @@ function update(){
  $('playerHand').textContent=state.rolls?evaluate(state.playerDice).name:'Bereit zum Würfeln';
  renderDice('playerDice',state.playerDice,true);renderDice('cpuDice',state.cpuDice);
 }
-function toggleKeep(i){if(state.phase!=='player'||state.busy||state.rolls===0||state.rolls>=3)return;state.kept[i]=!state.kept[i];$('instruction').textContent='Markierte Würfel bleiben liegen. Würfle erneut oder beende deinen Zug.';update();}
+function toggleKeep(i){if(state.phase!=='player'||state.busy||state.rolls===0||state.rolls>=3)return;state.kept[i]=!state.kept[i];GameSound.play('keep',state.kept[i]);$('instruction').textContent='Markierte Würfel bleiben liegen. Würfle erneut oder beende deinen Zug.';update();}
 async function animateRoll(id, oldValues, newValues, indices) {
   const token = state.session;
   const el = $(id);
   const moving = new Set(indices);
+  GameSound.play('roll', moving.size);
   const isPlayer = id === 'playerDice';
   const dice = newValues.map((value, i) => dieNode(value, {
     index: i,
@@ -166,6 +167,7 @@ function cpuHold(dice,remaining){
  return chooseHard(dice,remaining);
 }
 async function endPlayerTurn(){if(state.phase!=='player'||state.busy||state.rolls===0)return;
+ GameSound.play('finish-turn');
  state.phase='cpu';state.busy=true;state.kept=[false,false,false,false,false];$('instruction').textContent='Der Computer würfelt …';$('cpuStatus').textContent='Würfelt …';update();
  const token=state.session;let dice=[0,0,0,0,0];let keep=[false,false,false,false,false];
  for(let roll=0;roll<3;roll++){
@@ -185,24 +187,26 @@ async function endPlayerTurn(){if(state.phase!=='player'||state.busy||state.roll
  $('resultTitle').textContent=cmp>0?'Du gewinnst die Runde!':cmp<0?'Der Computer gewinnt!':'Unentschieden!';
  $('resultText').textContent=`Du: ${evaluate(state.playerDice).name} · Computer: ${evaluate(dice).name}`;
  $('continueButton').textContent=state.round===maxRounds?'Ergebnis ansehen':'Nächste Runde →';
+ GameSound.play('round',cmp);
  $('roundResult').classList.remove('hidden');$('instruction').textContent='Die Runde ist beendet.';
 }
 function nextRound(){if(state.phase!=='result')return;
  if(state.round===maxRounds){
   const result=state.playerScore>state.cpuScore?'Du hast das Spiel gewonnen!':state.playerScore<state.cpuScore?'Der Computer hat das Spiel gewonnen.':'Das Spiel endet unentschieden.';
   $('resultTitle').textContent=result;$('resultText').textContent=`Endstand: Du ${state.playerScore} : ${state.cpuScore} Computer`;
-  $('continueButton').textContent='Nochmal spielen';state.phase='finished';return;
+  $('continueButton').textContent='Nochmal spielen';state.phase='finished';GameSound.play('game-over',Math.sign(state.playerScore-state.cpuScore));return;
  }
+ GameSound.play('click');
  state.round++;state.playerDice=[0,0,0,0,0];state.cpuDice=[0,0,0,0,0];state.kept=[false,false,false,false,false];state.rolls=0;state.phase='player';state.busy=false;
  $('roundResult').classList.add('hidden');$('cpuStatus').textContent='Wartet auf seinen Zug';$('playerStatus').textContent='Würfle, um zu beginnen';$('cpuHand').textContent='Noch kein Wurf';$('instruction').textContent='Drücke „Würfeln“, um deinen ersten Wurf zu machen.';update();
 }
-function startGame(){const difficulty=document.querySelector('input[name="difficulty"]:checked').value;const session=state.session+1;
+function startGame(){GameSound.silence();GameSound.play('start');const difficulty=document.querySelector('input[name="difficulty"]:checked').value;const session=state.session+1;
  state={difficulty,round:1,playerScore:0,cpuScore:0,playerDice:[0,0,0,0,0],cpuDice:[0,0,0,0,0],kept:[false,false,false,false,false],rolls:0,phase:'player',busy:false,session};
  $('startScreen').classList.add('hidden');$('gameScreen').classList.remove('hidden');$('roundResult').classList.add('hidden');$('cpuStatus').textContent='Wartet auf seinen Zug';$('cpuHand').textContent='Noch kein Wurf';$('playerStatus').textContent='Würfle, um zu beginnen';$('instruction').textContent='Drücke „Würfeln“, um deinen ersten Wurf zu machen.';update();
 }
-function backToStart(){state.session++;state.phase='start';$('gameScreen').classList.add('hidden');$('startScreen').classList.remove('hidden');}
-function showRules(){const dialog=$('rulesDialog');if(!dialog.open)dialog.showModal()}
-$('rulesTop').addEventListener('click',showRules);$('rulesStart').addEventListener('click',showRules);$('closeRules').addEventListener('click',()=>$('rulesDialog').close());
-$('rulesDialog').addEventListener('click',e=>{if(e.target===$('rulesDialog'))$('rulesDialog').close()});
+function backToStart(){GameSound.silence();GameSound.play('click');state.session++;state.phase='start';$('gameScreen').classList.add('hidden');$('startScreen').classList.remove('hidden');}
+function showRules(){GameSound.play('click');const dialog=$('rulesDialog');if(!dialog.open)dialog.showModal()}
+$('rulesTop').addEventListener('click',showRules);$('rulesStart').addEventListener('click',showRules);$('closeRules').addEventListener('click',()=>{GameSound.play('click');$('rulesDialog').close();});
+$('rulesDialog').addEventListener('click',e=>{if(e.target===$('rulesDialog')){GameSound.play('click');$('rulesDialog').close();}});
 $('startButton').addEventListener('click',startGame);$('rollButton').addEventListener('click',playerRoll);$('standButton').addEventListener('click',endPlayerTurn);$('restartButton').addEventListener('click',backToStart);
 $('continueButton').addEventListener('click',()=>{if(state.phase==='finished')startGame();else nextRound()});

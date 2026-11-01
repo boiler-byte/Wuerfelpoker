@@ -6,12 +6,13 @@
   <meta name="theme-color" content="#102c25">
   <title>Покер на костях – Russisches Würfelpoker</title>
   <link rel="stylesheet" href="style.css">
+  <script src="sound.js" defer></script>
   <script src="game.js" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <main class="app">
-    <header class="topbar"><span class="brandmark">♠ <span>WÜRFELPOKER</span></span><button class="text-button" id="rulesTop" type="button">? Spielregeln</button></header>
+    <header class="topbar"><span class="brandmark">♠ <span>WÜRFELPOKER</span></span><div class="top-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="true" aria-label="Soundeffekte aktiviert"><span class="sound-icon" aria-hidden="true">&#9835;</span><span class="sound-label">Ton an</span></button><button class="text-button" id="rulesTop" type="button">? Spielregeln</button></div></header>
     <section id="startScreen" class="screen start-screen" aria-labelledby="mainTitle">
       <div class="hero-dice" aria-hidden="true"><span>⚄</span><span>⚅</span><span>⚃</span></div>
       <p class="eyebrow">FÜNF WÜRFEL · DREI WÜRFE · EIN SIEGER</p>
@@ -42,8 +43,8 @@
         <div class="dice-row" id="playerDice" aria-label="Deine Würfel"></div>
         <div class="player-info"><div class="player-icon">★</div><div><strong>Du</strong><span id="playerStatus">Würfle, um zu beginnen</span></div></div>
       </section>
-      <div class="game-controls"><p id="instruction" aria-live="polite">Drücke „Würfeln“, um deinen ersten Wurf zu machen.</p><div class="controls-row"><span id="rollsLeft" class="rolls-left">3 Würfe übrig</span><button id="rollButton" class="primary-button" type="button">⚄ Würfeln</button><button id="standButton" class="secondary-button" type="button" disabled>Zug beenden</button></div><p class="hint">Nach dem ersten Wurf: Würfel anklicken, um sie zu behalten.</p></div>
       <div id="roundResult" class="round-result hidden" role="status" aria-live="polite"><h2 id="resultTitle"></h2><p id="resultText"></p><button id="continueButton" class="primary-button" type="button">Nächste Runde →</button></div>
+      <div class="game-controls"><p id="instruction" aria-live="polite">Drücke „Würfeln“, um deinen ersten Wurf zu machen.</p><div class="controls-row"><span id="rollsLeft" class="rolls-left">3 Würfe übrig</span><button id="rollButton" class="primary-button" type="button">⚄ Würfeln</button><button id="standButton" class="secondary-button" type="button" disabled>Zug beenden</button></div><p class="hint">Nach dem ersten Wurf: Würfel anklicken, um sie zu behalten.</p></div>
     </section>
     <footer>Покер на костях <span>·</span> Russisches Würfelpoker</footer>
   </main>
