@@ -5,13 +5,55 @@ const maxRounds=5;
 let state={difficulty:'medium',round:1,playerScore:0,cpuScore:0,playerDice:[0,0,0,0,0],cpuDice:[0,0,0,0,0],kept:[false,false,false,false,false],rolls:0,phase:'start',busy:false,session:0};
 const rand=()=>1+Math.floor(Math.random()*6);
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-function dieNode(value,opts={}){
- const button=document.createElement(opts.selectable?'button':'div');
- button.className='die'+(opts.kept?' keep':'')+(opts.selectable?' selectable':'')+(!value?' placeholder':'');
- if(opts.selectable){button.type='button';button.setAttribute('aria-pressed',String(!!opts.kept));button.setAttribute('aria-label',`Würfel ${opts.index+1}: ${value}${opts.kept?', behalten':''}`);button.addEventListener('click',()=>toggleKeep(opts.index));}
- else button.setAttribute('aria-label',value?`Würfel ${value}`:'Noch nicht gewürfelt');
- for(let p=0;p<9;p++){const cell=document.createElement('span');if((faces[value]||[]).includes(p))cell.className='pip';button.append(cell)}
- return button;
+// Orient the 3D cube so that the requested number faces the player.
+// Opposite faces sum to seven, as on a real die.
+const faceOrientation = {
+  1: [0, 0], 2: [0, -90], 3: [-90, 0],
+  4: [90, 0], 5: [0, 90], 6: [0, 180]
+};
+const cubeFaces = [
+  ['front', 1], ['right', 2], ['top', 3],
+  ['bottom', 4], ['left', 5], ['back', 6]
+];
+function dieNode(value, opts = {}) {
+  const die = document.createElement(opts.selectable ? 'button' : 'div');
+  die.className = 'die' + (opts.kept ? ' keep' : '') +
+    (opts.selectable ? ' selectable' : '') + (!value ? ' placeholder' : '');
+  if (opts.selectable) {
+    die.type = 'button';
+    die.setAttribute('aria-pressed', String(!!opts.kept));
+    die.setAttribute('aria-label', `Würfel ${opts.index + 1}: ${value}${opts.kept ? ', behalten' : ''}`);
+    die.addEventListener('click', () => toggleKeep(opts.index));
+  } else {
+    die.setAttribute('role', 'img');
+    die.setAttribute('aria-label', value ? `Würfel ${value}` : 'Noch nicht gewürfelt');
+  }
+
+  const shadow = document.createElement('span');
+  shadow.className = 'die-shadow';
+  shadow.setAttribute('aria-hidden', 'true');
+  die.append(shadow);
+
+  const cube = document.createElement('span');
+  cube.className = 'die-cube';
+  cube.setAttribute('aria-hidden', 'true');
+  const [x, y] = faceOrientation[value] || faceOrientation[1];
+  die.style.setProperty('--face-x', `${x}deg`);
+  die.style.setProperty('--face-y', `${y}deg`);
+
+  for (const [side, number] of cubeFaces) {
+    const face = document.createElement('span');
+    face.className = `die-face face-${side}`;
+    const pips = value ? faces[number] : [];
+    for (let cell = 0; cell < 9; cell++) {
+      const spot = document.createElement('span');
+      if (pips.includes(cell)) spot.className = 'pip';
+      face.append(spot);
+    }
+    cube.append(face);
+  }
+  die.append(cube);
+  return die;
 }
 function renderDice(id,dice,selectable=false){const el=$(id);el.replaceChildren(...dice.map((v,i)=>dieNode(v,{index:i,kept:selectable&&state.kept[i],selectable:selectable&&v>0&&state.phase==='player'&&!state.busy&&state.rolls>0&&state.rolls<3})));}
 function evaluate(dice){
@@ -42,10 +84,47 @@ function update(){
  renderDice('playerDice',state.playerDice,true);renderDice('cpuDice',state.cpuDice);
 }
 function toggleKeep(i){if(state.phase!=='player'||state.busy||state.rolls===0||state.rolls>=3)return;state.kept[i]=!state.kept[i];$('instruction').textContent='Markierte Würfel bleiben liegen. Würfle erneut oder beende deinen Zug.';update();}
-async function animateRoll(id,oldValues,newValues,indices){
- const el=$(id);const duration=650;const tick=70;
- for(let t=0;t<duration;t+=tick){const d=oldValues.map((v,i)=>indices.includes(i)?rand():v);el.replaceChildren(...d.map(v=>dieNode(v)));el.querySelectorAll('.die').forEach((x,i)=>{if(indices.includes(i))x.classList.add('rolling')});await wait(tick)}
- el.replaceChildren(...newValues.map(v=>dieNode(v)));
+async function animateRoll(id, oldValues, newValues, indices) {
+  const token = state.session;
+  const el = $(id);
+  const moving = new Set(indices);
+  const isPlayer = id === 'playerDice';
+  const dice = newValues.map((value, i) => dieNode(value, {
+    index: i,
+    // Retained player dice stay exactly where they were during the next roll.
+    kept: isPlayer && state.kept[i] && !moving.has(i)
+  }));
+  el.replaceChildren(...dice);
+
+  if (!moving.size || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // No unnecessary flashing for people who prefer reduced motion.
+    return;
+  }
+
+  const duration = 940;
+  dice.forEach((die, i) => {
+    if (!moving.has(i)) return;
+    const [fromX, fromY] = faceOrientation[oldValues[i]] || faceOrientation[1];
+    const [toX, toY] = faceOrientation[newValues[i]];
+    die.style.setProperty('--start-x', `${fromX}deg`);
+    die.style.setProperty('--start-y', `${fromY}deg`);
+    die.style.setProperty('--end-x', `${toX + (i % 2 === 0 ? 720 : -720)}deg`);
+    die.style.setProperty('--end-y', `${toY + (i % 2 === 0 ? -720 : 720)}deg`);
+    die.style.setProperty('--roll-x', `${[-22, 24, -18, 27, -24][i]}px`);
+    die.style.setProperty('--roll-turn', `${i % 2 === 0 ? -17 : 18}deg`);
+    die.style.setProperty('--roll-delay', `${i * 45}ms`);
+    die.style.setProperty('--roll-time', `${duration}ms`);
+    die.classList.add('rolling');
+  });
+
+  // Keep the 3D cubes mounted during their entire roll; only replace them
+  // after the last staggered die has landed, so there is no jump or flicker.
+  await wait(duration + 4 * 45 + 35);
+  if (token !== state.session) return;
+  el.replaceChildren(...newValues.map((value, i) => dieNode(value, {
+    index: i,
+    kept: isPlayer && state.kept[i]
+  })));
 }
 async function playerRoll(){if(state.phase!=='player'||state.busy||state.rolls>=3)return;state.busy=true;const token=state.session;
  const indices=state.playerDice.map((_,i)=>i).filter(i=>state.rolls===0||!state.kept[i]);
