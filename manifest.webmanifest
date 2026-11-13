@@ -1,0 +1,36 @@
+{
+  "name": "Покер на костях – Russisches Würfelpoker",
+  "short_name": "Würfelpoker",
+  "description": "Fünf Würfel, drei Würfe: Russisches Würfelpoker gegen den Computer.",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#102820",
+  "theme_color": "#102c25",
+  "lang": "de",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

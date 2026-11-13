@@ -2,12 +2,21 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#102c25">
+  <meta name="description" content="Fünf Würfel, drei Würfe: Russisches Würfelpoker gegen den Computer. Offline spielbar.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Würfelpoker">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
   <title>Покер на костях – Russisches Würfelpoker</title>
   <link rel="stylesheet" href="style.css">
   <script src="sound.js" defer></script>
   <script src="game.js" defer></script>
+  <script src="pwa.js" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -29,6 +38,7 @@
         <button id="startButton" class="primary-button wide" type="button">Spiel starten <span aria-hidden="true">→</span></button>
         <button id="rulesStart" class="secondary-button wide" type="button">Spielregeln ansehen</button>
       </div>
+      <button id="installButton" class="install-button" type="button" hidden>↓ Als App installieren</button>
       <p class="fineprint">5 Runden · 3 Würfe pro Zug · Höchste Kombination gewinnt</p>
     </section>
     <section id="gameScreen" class="screen game-screen hidden" aria-label="Würfelpoker-Spiel">
@@ -48,6 +58,7 @@
     </section>
     <footer>Покер на костях <span>·</span> Russisches Würfelpoker</footer>
   </main>
+  <dialog id="installHelpDialog" class="install-help-dialog" aria-labelledby="installHelpTitle"><h2 id="installHelpTitle">Auf dem Home-Bildschirm installieren</h2><p>Öffne die Seite in Safari, tippe auf <strong>Teilen</strong> und wähle <strong>„Zum Home-Bildschirm“</strong> bzw. <strong>„Zum Home-Bildschirm hinzufügen“</strong>. Danach kannst du das Spiel über das App-Symbol starten.</p><button id="closeInstallHelp" class="primary-button" type="button">Verstanden</button></dialog>
   <dialog id="rulesDialog" class="rules-dialog" aria-labelledby="rulesTitle"><div class="dialog-head"><h2 id="rulesTitle">Spielregeln</h2><button id="closeRules" class="icon-button" type="button" aria-label="Regeln schließen">✕</button></div><iframe id="rulesFrame" title="Spielregeln" src="regeln.html"></iframe></dialog>
 </body>
 </html>

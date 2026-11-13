@@ -93,3 +93,14 @@
 /* The result panel now appears directly above the game controls. */
 .round-result{margin:18px auto 3px;max-width:670px}
 @media(max-width:420px){.top-actions{gap:9px}.sound-toggle{min-width:77px;padding:6px 9px}.brandmark span{font-size:10px;letter-spacing:.05em}}
+
+/* PWA: safe-area support for installed apps, and optional install action. */
+body{padding-top:env(safe-area-inset-top);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left)}
+.install-button{display:inline-flex;align-items:center;justify-content:center;margin:17px 0 0;padding:11px 17px;border:1px solid #c6a05b;border-radius:999px;background:#f1e6c91a;color:#f2d494;font:700 13px ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer}
+.install-button:hover{background:#f1e6c92b}
+.install-button:focus-visible{outline:3px solid #f2d494;outline-offset:3px}
+.install-button[hidden]{display:none}
+.install-help-dialog{width:min(430px,calc(100% - 32px));border:1px solid #c6b17c;border-radius:16px;background:#f6f2e7;color:#142c22;padding:25px;box-shadow:0 25px 100px #0009;line-height:1.6}
+.install-help-dialog::backdrop{background:#03130ebd}
+.install-help-dialog h2{font:normal 25px Georgia,serif;margin:0 0 12px}
+.install-help-dialog p{font-size:14px;margin:0 0 20px}
